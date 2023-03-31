@@ -1,59 +1,69 @@
 import random
+from replit import clear
 
-# create a deck of cards
 deck = []
-suits = ['hearts', 'diamonds', 'clubs', 'spades']
-values = {'ace': 11, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
-          '7': 7, '8': 8, '9': 9, '10': 10, 'jack': 10, 'queen': 10, 'king': 10}
+cards = { "A" : 11, "2" : 2, "3" : 3, "4" : 4, "5" : 5, "6" : 6,
+          "7" : 7, "8" : 8, "9" : 9, "10" : 10, "J" : 10, "Q" : 10, "K" : 10}
+suits = ["♥ Hearts", "♦ Diamonds", "♣ Clubs", "♠ Spades"]
 
-for suit in suits:
-    for value in values:
-        deck.append(value + ' of ' + suit)
+for card_name in cards:
+    for suit in suits:
+        full_card_name = (card_name + " of " + suit)
+        deck.append(full_card_name)
 
-# function to calculate the total points of a hand
-def calculate_hand(hand):
-    total = 0
-    num_aces = 0
+random.shuffle(deck)
+
+def cards_in_hand_value(hand):
+    total_value = 0
     for card in hand:
-        value = card.split()[0]
-        if value == 'ace':
-            num_aces += 1
-        total += values[value]
-    while num_aces > 0 and total > 21:
-        total -= 10
-        num_aces -= 1
-    return total
+        card_value = card.split()[0]
+        total_value += cards[card_value]
+    return(total_value)
 
-# deal two cards to the player and two to the dealer
-player_hand = [deck.pop(random.randint(0, len(deck)-1)), deck.pop(random.randint(0, len(deck)-1))]
-dealer_hand = [deck.pop(random.randint(0, len(deck)-1)), deck.pop(random.randint(0, len(deck)-1))]
+player_hand = [deck.pop(0), deck.pop(2)]
+dealer_hand = [deck.pop(1), ]
 
-# game loop
-while True:
-    print('Your hand:', player_hand)
-    print('Dealer showing:', dealer_hand[0])
-    player_total = calculate_hand(player_hand)
-    dealer_total = calculate_hand(dealer_hand)
-    if player_total == 21:
-        print('Blackjack! You win.')
-        break
-    elif player_total > 21:
-        print('Bust. You lose.')
-        break
-    else:
-        choice = input('Hit or stand? ')
-        if choice.lower() == 'hit':
-            player_hand.append(deck.pop(random.randint(0, len(deck)-1)))
-        elif choice.lower() == 'stand':
-            while dealer_total < 17:
-                dealer_hand.append(deck.pop(random.randint(0, len(deck)-1)))
-                dealer_total = calculate_hand(dealer_hand)
-            if dealer_total > 21:
-                print('Dealer bust. You win.')
-            elif dealer_total > player_total:
-                print('Dealer wins.')
-            elif dealer_total < player_total:
-                print('You win.')
-            else:
-                print('Push.')
-            break
+#Game:
+print(f"Players' hand: {player_hand}, Points: {cards_in_hand_value(player_hand)}")
+print(f"Dealers' hand: [{dealer_hand[0]}, 'x' ], Points: {cards_in_hand_value(dealer_hand)}")
+game_continue = True
+while game_continue:
+    if cards_in_hand_value(player_hand) < 21 and cards_in_hand_value(dealer_hand) < 21:
+        players_choice = input("Do you want to hit or stand?: ").lower()
+        if players_choice == "hit":
+            deck.pop(3)
+            player_hand.append(deck.pop(3))
+            print(f"Players' hand: {player_hand}, Points: {cards_in_hand_value(player_hand)}")
+            continue
+        elif players_choice == "stand":
+            deck.pop(4)
+            dealer_hand.append(deck.pop(4))
+            print(f"Dealers' hand: {dealer_hand}, Points: {cards_in_hand_value(dealer_hand)}")
+            if cards_in_hand_value(dealer_hand) < 17 and cards_in_hand_value(player_hand) > cards_in_hand_value(dealer_hand):
+                deck.pop(5)
+                dealer_hand.append(deck.pop(5))
+                print(f"Players' hand: {player_hand}, Points: {cards_in_hand_value(player_hand)}")
+                print(f"Dealers' hand: {dealer_hand}, Points: {cards_in_hand_value(dealer_hand)}")
+            elif cards_in_hand_value(dealer_hand) > 17:
+                print(f"Players' hand: {player_hand}, Points: {cards_in_hand_value(player_hand)}")
+                print(f"Dealers' hand: {dealer_hand}, Points: {cards_in_hand_value(dealer_hand)}")
+    if cards_in_hand_value(player_hand) > 21:
+        print("Bust! You've lost!")
+    elif cards_in_hand_value(player_hand) == 21:
+        print("Blackjack! You've won!")
+    elif cards_in_hand_value(dealer_hand) > 21:
+        print("You've won!")
+    elif cards_in_hand_value(dealer_hand) == 21:
+        print("You've lost!")
+    elif cards_in_hand_value(player_hand) > cards_in_hand_value(dealer_hand):
+        print("You've won!")
+    elif cards_in_hand_value(player_hand) < cards_in_hand_value(dealer_hand):
+        print("You've lost!")
+    elif cards_in_hand_value(player_hand) == cards_in_hand_value(dealer_hand):
+        print("Draw! You've collected the same amount of points!")
+    game_continue = input("Do you want to start again? y if yes, n if no:  ").lower()
+    if game_continue == "y":
+        clear()
+    elif game_continue == "n":
+        game_continue = False
+        print("Thank you for playing!")
